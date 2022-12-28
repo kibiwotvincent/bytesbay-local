@@ -3,67 +3,50 @@
 	require('Http.php');
 
 	class User {
-		public function syncUser($APIAuthToken) {
-			//fetch/update local users from online database
-			$http = new Http;
+		public function syncUser($username, $hotspotLoginToken) {
 			$config = new Config;
-			$http->setAuth($APIAuthToken);
-			$http->curlGET($config->get('sync_user_url'));
-			$response = $http->run();
 			
 			$synced = false;
-			$phoneNumber = null;
-			$hotspotLoginToken = null;
+				
+			//insert or update local user
+			$db = new Database;
+			$pdo = $db->start();
 			
-			if($response['status_code'] == 200) {
-				//server returns JSON with phone number and hotspot login token
-				$responseArray = json_decode($response['response'], true);
-				
-				$phoneNumber = $responseArray['phone_number'];
-				$hotspotLoginToken = $responseArray['hotspot_login_token'];
-				
-				//insert or update local user
-				$db = new Database;
-				$pdo = $db->start();
-				
-				//first check if user exists
-				$stmt = $pdo->prepare("SELECT * FROM radcheck WHERE username=:username LIMIT 1");
-				$stmt->execute(['username' => $phoneNumber]);
-				$user = [];
-				while($row = $stmt->fetch()) {
-					$user = $row;
+			//first check if user exists
+			$stmt = $pdo->prepare("SELECT * FROM radcheck WHERE username=:username LIMIT 1");
+			$stmt->execute(['username' => $username]);
+			$user = [];
+			while($row = $stmt->fetch()) {
+				$user = $row;
+			}
+			
+			if(empty($user)) { 
+				//insert new user
+				$stmt = $pdo->prepare("INSERT INTO radcheck(username,attribute,op,value) VALUES(:username, :attribute, :op, :value)");
+				$stmt->execute(['username' => $username,'attribute' => "Cleartext-Password",'op' => ":=",'value' => $hotspotLoginToken]);
+				if($stmt->rowCount() > 0) {
+					//user synced
+					$synced = true;
 				}
-				
-				if(empty($user)) { 
-					//insert new user
-					$user = array('username' => $phoneNumber,'attribute' => "Cleartext-Password",'op' => ":=",'value' => $hotspotLoginToken);
-			
-					$stmt = $pdo->prepare("INSERT INTO radcheck(username,attribute,op,value) VALUES(:username, :attribute, :op, :value)");
-					$stmt->execute($user);
+			}
+			else {
+				//update user only if hotspot_login_token has changed
+				if($user['value'] != $hotspotLoginToken) {
+					$stmt = $pdo->prepare("UPDATE radcheck SET value=:value WHERE username=:username");
+					$status = $stmt->execute(['value' => $hotspotLoginToken, 'username' => $username]);
 					if($stmt->rowCount() > 0) {
 						//user synced
 						$synced = true;
 					}
 				}
 				else {
-					//update user only if hotspot_login_token has changed
-					if($user['value'] != $hotspotLoginToken) {
-						$stmt = $pdo->prepare("UPDATE radcheck SET value=:value WHERE username=:username");
-						$status = $stmt->execute(['value' => $hotspotLoginToken, 'username' => $phoneNumber]);
-						if($stmt->rowCount() > 0) {
-							//user synced
-							$synced = true;
-						}
-					}
-					else {
-						$synced = true;
-					}
+					$synced = true;
 				}
-				$db->close();
 			}
+			$db->close();
 			
 			if($synced) {
-				return ['status' => true, 'username' => $phoneNumber, 'password' => $hotspotLoginToken];
+				return ['status' => true, 'username' => $username, 'password' => $hotspotLoginToken];
 			}
 			else {
 				return ['status' => false];

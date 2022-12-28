@@ -19,6 +19,7 @@
 						  CURLOPT_RETURNTRANSFER => 1,
 						  CURLOPT_TIMEOUT => 20,
 						  CURLOPT_HTTPHEADER => $this->headers,
+						  CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
 						  //for debug only
 						  CURLOPT_SSL_VERIFYHOST => false,
 						  CURLOPT_SSL_VERIFYPEER => false,
@@ -36,6 +37,7 @@
 						  CURLOPT_HTTPHEADER => $this->headers,
 						  CURLOPT_POST => 1,
 						  CURLOPT_POSTFIELDS => $params,
+						  CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
 						  //for debug only
 						  CURLOPT_SSL_VERIFYHOST => false,
 						  CURLOPT_SSL_VERIFYPEER => false,
