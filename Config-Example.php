@@ -10,8 +10,8 @@ class Config {
 				'disconnect_users_url' => "http://www.bytesbay.com/api/disconnects",
 				'disconnected_url' => "http://www.bytesbay.com/api/disconnected",
 				'API_KEY' => "XXXX",
-				'hotspot_disconnect_url' => "http://192.168.0.1/disconnect_user",
-				'captivezone_name' => "XXXX"
+				'hotspot_disconnect_url' => "http://192.168.1.1/status_captiveportal.php",
+				'portal_zone' => "XXXX"
 				];
 	
 	public function get($config = null) {

@@ -1,13 +1,14 @@
 <?php
-	header('Access-Control-Allow-Origin: *');/*allow being called from captive portal login*/
-	
 	require('User.php');
 	$user = new User;
-	$response = $user->syncUser($_POST['username'], $_POST['token']);
+	$response = $user->syncUser($_GET['u'], $_GET['p']);
 	if($response['status'] === true) {
-		print json_encode(['status' => 1, 'username' => $response['username'], 'password' => $response['password']]);
+		//do login
+		$user->connectUser($_GET['loginurl'], $response['username'], $response['password'], $_GET['zone'], $_GET['redirurl']);
 	}
-	else {
-		print json_encode(['status' => 0]);
-	}
+	
+	//redirect to google.com 
+	//if user was logged in successfully then google.com will load, 
+	//otherwise they will be redirected to captiveportal page
+	header('Location: http://www.google.com');
 ?>
