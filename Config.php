@@ -6,11 +6,10 @@ class Config {
 				'db_password' => "admin",
 				'db_name' => "radiusdb",
 				'db_charset' => 'utf8',
-				'sync_user_url' => "https://bytesbay.naet-tech.com/api/sync-user",
 				'disconnect_users_url' => "http://www.bytesbay.com/api/disconnects",
 				'disconnected_url' => "http://www.bytesbay.com/api/disconnected",
+				'hotspot_disconnect_url' => "http://localhost/captiveportal/disconnect-user.php",
 				'API_KEY' => "427|vwxOFjDjDzynYsYN8gsiZ0gqWSKehpgtV7f6q3cT",
-				'hotspot_disconnect_url' => "http://192.168.1.1:8002/index.php?zone=lan",
 				'portal_zone' => "lan"
 				];
 	

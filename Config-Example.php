@@ -6,11 +6,10 @@ class Config {
 				'db_password' => "XXXX",
 				'db_name' => "XXXX",
 				'db_charset' => 'utf8',
-				'sync_user_url' => "https://bytesbay.naet-tech.com/api/sync-user",
-				'disconnect_users_url' => "http://www.bytesbay.com/api/disconnects",
-				'disconnected_url' => "http://www.bytesbay.com/api/disconnected",
+				'disconnect_users_url' => "https://bytesbay.naet-tech.com/api/disconnects",
+				'disconnected_url' => "https://bytesbay.naet-tech.com/api/disconnected",
 				'API_KEY' => "XXXX",
-				'hotspot_disconnect_url' => "http://192.168.1.1/status_captiveportal.php",
+				'hotspot_disconnect_url' => "http://192.168.1.1:8002/disconnect-user.php",
 				'portal_zone' => "XXXX"
 				];
 	
