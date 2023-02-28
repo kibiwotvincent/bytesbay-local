@@ -6,11 +6,11 @@ class Config {
 				'db_password' => "admin",
 				'db_name' => "radiusdb",
 				'db_charset' => 'utf8',
-				'disconnect_users_url' => "http://www.bytesbay.com/api/disconnects",
-				'disconnected_url' => "http://www.bytesbay.com/api/disconnected",
+				'get_subscribed_users_url' => "http://www.bytesbay.com/api/active-users", /*fetch online users with active subscription*/
+				'get_connected_users_url' => "http://localhost/captiveportal/users.php", /*fetch connected pfsense users*/
 				'hotspot_disconnect_url' => "http://localhost/captiveportal/disconnect-user.php",
-				'API_KEY' => "427|vwxOFjDjDzynYsYN8gsiZ0gqWSKehpgtV7f6q3cT",
-				'portal_zone' => "lan"
+				'API_KEY' => "628|lQNxx7fZIpu2hyoF8rJTeG7vnsqS5Z4p09Es1G8o",
+				'zone' => "lan"
 				];
 	
 	public function get($config = null) {

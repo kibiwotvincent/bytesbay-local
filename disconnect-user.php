@@ -1,16 +1,15 @@
 <?php
-
 	require('User.php');
+	
+	//disconnect from pfsense
 	$user = new User;
 	
-	$username = $_GET['u'];
-	$status = $user->disconnectUser($username);
-	
-	if($status === true) {
-		print($username." has been disconnected.<br/>");
+	$sessionID = $_GET['session'];
+	$response = $user->disconnectUser($sessionID);
+	if($response == "DISCONNECTED") {
+		print("DISCONNECTED");
 	}
 	else {
-		print("Error disconnecting ".$username."<br/>");
+		print("FAILED");
 	}
-	
 ?>

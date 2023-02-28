@@ -1,14 +1,24 @@
 <?php
 	require('User.php');
 	$user = new User;
-	$response = $user->syncUser($_GET['u'], $_GET['p']);
-	if($response['status'] === true) {
-		//do login
-		$user->connectUser($_GET['loginurl'], $response['username'], $response['password'], $_GET['zone'], $_GET['redirurl']);
-	}
+	$username = $_GET['u'];
+	$password = $_GET['p'];
+	$url = $_GET['url'];
+	$zone = $_GET['zone'];
+	$redirurl = $_GET['redirurl'];
 	
-	//redirect to google.com 
-	//if user was logged in successfully then google.com will load, 
-	//otherwise they will be redirected to captiveportal page
-	header('Location: http://www.google.com');
+	$response = $user->syncUser($username, $password);
+	//$loginResponse = $user->connectUser($url, $username, $password, $zone, $redirurl);
+	//print($loginResponse);die;
+	
+	if($response['status'] === true) {
+		//redirect to pfsense login to auto-login user
+		/*do not encode url*/
+		$loginUrl = $url."?zone=".$zone."&redirurl=".$redirurl."&u=".$username."&p=".$password;
+		
+		header('Location: '.$loginUrl);
+	}
+	else {
+		print("Failed to sync user. Try again.");
+	}
 ?>

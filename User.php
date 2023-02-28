@@ -53,37 +53,77 @@
 			}
 		}
 		
-		public function getUsersToDisconnect() {
+		public function getSubscribedUsers() {
 			//fetch users to disconnect from online database
 			$http = new Http;
 			$config = new Config;
-			$http->setAuth($config->get('API_KEY'));
-			$http->curlGET($config->get('disconnect_users_url'));
-			$response = $http->run();
-			
-			if($response['status_code'] == 200) {
-				return json_decode($response['response'], true);
-			}
-			else {
-				return [];
+			try {
+				$http->setAuth($config->get('API_KEY'));
+				$http->curlGET($config->get('get_subscribed_users_url'));
+				$responseArray = $http->run();
+				
+				if($responseArray['status'] == true) {
+					$subscribedUsers = json_decode($responseArray['response'], true);
+					//check if response is valid json
+					if(json_last_error() != JSON_ERROR_NONE) {
+						throw new Exception("Error: ".$responseArray['response']);
+					}
+					
+					return $subscribedUsers;
+				}
+				else {
+					throw new Exception("Cannot fetch subscribed users.");
+				}
+			} 
+			catch (\Exception $e) {
+				return $e->getMessage();
 			}
 		}
 		
-		public function disconnectUser($username) {
+		public function getConnectedUsers() {
+			//fetch users to disconnect from online database
+			$http = new Http;
 			$config = new Config;
+			
+			try {
+				$http->curlGET($config->get('get_connected_users_url'));
+				$responseArray = $http->run();
+				
+				if($responseArray['status'] == true) {
+					$connectedUsers = json_decode($responseArray['response'], true);
+					//check if response is valid json
+					if(json_last_error() != JSON_ERROR_NONE) {
+						throw new Exception("Error: ".$responseArray['response']);
+					}
+					
+					return $connectedUsers;
+				}
+				else {
+					throw new Exception("Cannot fetch connected users.");
+				}
+			} 
+			catch (\Exception $e) {
+				return $e->getMessage();
+			}
+		}
+		
+		public function disconnectUser($sessionID) {
+			if($sessionID == "") return "Session ID is empty.";
+			
+			$config = new Config;
+			$http = new Http;
 				
 			// set default options
 			$options = array(
 			  CURLOPT_URL => $config->get('hotspot_disconnect_url'),
-			  CURLOPT_HEADER => 1,
 			  CURLOPT_RETURNTRANSFER => 1,
-			  CURLOPT_TIMEOUT => 30
+			  CURLOPT_TIMEOUT => 5
 			);
 			
 			$data = [
-						'username' => $username, 
-						'zone' => $config->get('portal_zone'),
-						'terminate' => "Disconnect",
+						'logout_id' => $sessionID, 
+						'zone' => $config->get('zone'),
+						'logout' => "Disconnect",
 						'Content-Type' => 'application/x-www-form-urlencoded',
 					];
 					
@@ -94,57 +134,26 @@
 		
 			$options[CURLOPT_POST] = 1;
 			$options[CURLOPT_POSTFIELDS] = trim($requestBody);
-				
-			$curl = NULL;
+			
 			try {
-				if ($curl = curl_init()) {
-					if (curl_setopt_array($curl, $options)) {
-						if ($response = curl_exec($curl)) {
-							print($response);
-							$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-							
-							curl_close($curl);
-							return ($status === 200) ? TRUE : FALSE;
-						} else {
-							throw new Exception(curl_error($curl));
-							return FALSE;
-						}
-					} else {
-						throw new Exception(curl_error($curl));
-						return FALSE;
-					}
-				} else {
-					throw new Exception('unable to initialize cURL');
-					return FALSE;
+				$http->options = $options;
+				$responseArray = $http->run();
+				if($responseArray['status_code'] == 200) {
+					return $responseArray['response'];
 				}
-			} catch (Exception $e) {
-				print_r($e);
-				if (is_resource($curl)) {
-					curl_close($curl);
+				else {
+					throw new Exception($responseArray['response']);
 				}
-				throw $e;
-				return FALSE;
+			} 
+			catch (\Exception $e) {
+				return $e->getMessage();
 			}
-			
-			return true;
-		}
-		
-		public function disconnected($users) {
-			//update disconnected users in online database
-			$http = new Http;
-			$config = new Config;
-			$http->setAuth($config->get('API_KEY'));
-			$http->curlPOST($config->get('disconnected_url'), ['users' => implode("-", $users)]);
-			$response = $http->run();
-			
-			return ($response['status_code'] == 200);
 		}
 		
 		public function connectUser($portalLoginUrl, $username, $password, $zone, $redirUrl) {
 			// set default options
 			$options = array(
 			  CURLOPT_URL => $portalLoginUrl,
-			  CURLOPT_HEADER => 1,
 			  CURLOPT_RETURNTRANSFER => 1,
 			  CURLOPT_TIMEOUT => 30
 			);
@@ -168,36 +177,20 @@
 			$options[CURLOPT_POST] = 1;
 			$options[CURLOPT_POSTFIELDS] = trim($requestBody);
 				
-			$curl = NULL;
 			try {
-				if ($curl = curl_init()) {
-					if (curl_setopt_array($curl, $options)) {
-						if ($response = curl_exec($curl)) {
-							$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-							
-							curl_close($curl);
-							return ($status === 200) ? TRUE : FALSE;
-						} else {
-							throw new Exception(curl_error($curl));
-							return FALSE;
-						}
-					} else {
-						throw new Exception(curl_error($curl));
-						return FALSE;
-					}
-				} else {
-					throw new Exception('unable to initialize cURL');
-					return FALSE;
+				$http = new Http;
+				$http->options = $options;
+				$responseArray = $http->run();
+				if($responseArray['status_code'] == 200) {
+					return $responseArray['response'];
 				}
-			} catch (Exception $e) {
-				if (is_resource($curl)) {
-					curl_close($curl);
+				else {
+					throw new Exception($responseArray['response']);
 				}
-				throw $e;
-				return FALSE;
+			} 
+			catch (\Exception $e) {
+				return $e->getMessage();
 			}
-			
-			return true;
 		}
 		
 	}
